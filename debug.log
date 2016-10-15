@@ -1,0 +1,29 @@
+[3044:8196:1014/224412:VERBOSE1:crash_service_main.cc(68)] Session start. cmdline is [--reporter-url=http://54.249.141.255:1127/post --application-name=Atom --v=1]
+[3044:8196:1014/224412:VERBOSE1:crash_service.cc(142)] window handle is 000704A0
+[3044:8196:1014/224412:VERBOSE1:crash_service.cc(290)] pipe name is \\.\pipe\Atom Crash Service
+dumps at C:\PROGRA~1\Java\JDK17~1.0_6\bin\Atom Crashes
+[3044:8196:1014/224412:VERBOSE1:crash_service.cc(294)] checkpoint is C:\PROGRA~1\Java\JDK17~1.0_6\bin\Atom Crashes\crash_checkpoint.txt
+server is http://54.249.141.255:1127/post
+maximum 128 reports/day
+reporter is electron-crash-service
+[3044:8196:1014/224412:VERBOSE1:crash_service_main.cc(84)] Ready to process crash requests
+[3044:1964:1014/224412:VERBOSE1:crash_service.cc(323)] client start. pid = 7916
+[3044:1964:1014/224413:VERBOSE1:crash_service.cc(323)] client start. pid = 8900
+[7920:7972:1014/224413:VERBOSE1:crash_service_main.cc(68)] Session start. cmdline is [--reporter-url=http://54.249.141.255:1127/post --application-name=Atom --v=1]
+[7920:7972:1014/224413:VERBOSE1:crash_service.cc(142)] window handle is 000304DC
+[7920:7972:1014/224413:VERBOSE1:crash_service.cc(290)] pipe name is \\.\pipe\Atom Crash Service
+dumps at C:\PROGRA~1\Java\JDK17~1.0_6\bin\Atom Crashes
+[7920:7972:1014/224413:VERBOSE1:crash_service.cc(294)] checkpoint is C:\PROGRA~1\Java\JDK17~1.0_6\bin\Atom Crashes\crash_checkpoint.txt
+server is http://54.249.141.255:1127/post
+maximum 128 reports/day
+reporter is electron-crash-service
+[7920:7972:1014/224413:ERROR:crash_service.cc(301)] could not start dumper
+[3044:7444:1014/224942:VERBOSE1:crash_service.cc(331)] client end. pid = 8900
+[3044:7444:1014/224942:VERBOSE1:crash_service.cc(331)] client end. pid = 7916
+[3044:7444:1014/224943:VERBOSE1:crash_service.cc(352)] zero clients. exiting
+[3044:8196:1014/224943:VERBOSE1:crash_service.cc(490)] session ending..
+[3044:8196:1014/224943:VERBOSE1:crash_service.cc(495)] clients connected :2
+clients terminated :2
+dumps serviced :0
+dumps reported :0
+[3044:8196:1014/224943:VERBOSE1:crash_service_main.cc(89)] Session end. return code is 0
