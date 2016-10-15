@@ -1,6 +1,7 @@
 import urllib2
 import json
 import random
+import requests
 
 API_BASE="http://bartjsonapi.elasticbeanstalk.com/api"
 
@@ -82,17 +83,22 @@ def get_movie(session, movieName):
     should_end_session = False
     speech_output = "You searched for %s" %(movieName)
 
-    text = random.choice(followQuestions)
-    place = followQuestions.index(text)
-    if place == 0:
-        text.format("actor name")
-    elif place == 1:
-        text.format("actor name", "movie 2")
+    text = followQuestions[1]# random.choice(followQuestions)
+    #place = followQuestions.index(text)
+
+    num = text.count("{")
+
+    if num == 1:
+        text.format(random.choice(pullActors(movieName))
+    elif num == 2:
+        actor = random.choice(pullActors(movieName))
+        movie = random.choice(pullMoviesFromActor(actor))
+        text.format(actor, movie)
 
     speech_output+= ', '
     speech_output += text
     session['movie'].append(movieName)
-    dicti = {"question":text, "actor" : "actor name", "film" : "movie 2"}
+    dicti = {"question":text, "actor" : actor, "film" : movie}
     session['movie'].append(dicti)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -107,9 +113,11 @@ def get_actor(session, actorName):
 
     text = random.choice(followQuestions)
     place = followQuestions.index(text)
+
     if place == 0:
-        text.format("actor name")
+        text.format(actorName)
     elif place == 1:
+
         text.format("actor name", "movie 2")
 
     speech_output+= ', '
@@ -126,17 +134,21 @@ def yes(attributes):
     card_title = "they answered yes"
     reprompt_text = ''
     should_end_session = False
-    text = random.choice(followQuestions)
-    place = followQuestions.index(text)
+    text = followQuestions[1]#random.choice(followQuestions)
+    #num = followQuestions.count('{')
 
+    data = attributes['movies'][-1]
 
-    if place == 0:
-        text.format("actor name")
-    elif place == 1:
-        text.format("actor name", "movie 2")
+    # if num == 0:
+    #     data
+    #     text.format("actor name")
+    # elif num == 1:
+    #     text.format("actor name", "movie 2")
+    actor = pullActors(data['movie'])
+    film = pullMoviesFromActor(actor)
+    text.format(actor, film)
 
-
-    attributes['movie'].append({"question":text, "actor" : "actor name", "film" : "movie 2"})
+    attributes['movie'].append({"question":text, "actor" : actor, "film" : film})
 
     return build_response(attributes, build_speechlet_response(
         card_title, text, reprompt_text, should_end_session))
@@ -160,6 +172,33 @@ def no(attributes):
     return build_response(attributes, build_speechlet_response(
         card_title, text, reprompt_text, should_end_session))
 
+def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
+    aPlusName = aName.replace(" ","+")
+    ps = {'q':aPlusName}
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    pj = json.loads(r.text)
+    #print r.url
+    names = []
+    findall(pj,"names",names) #find all name dicts (only 1)
+    findByVal(names,aName,'id') # Find id of actor
+    r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
+    actorPage = json.loads(r2.text)
+    movies = []
+    findall(actorPage,"title",movies) #Find all movies the actor is in
+    print movies[1:] #movie 0 is actor name lol
+    return movies[1:]
+
+def pullActors(mTitle):
+    ps = {'q':mTitle}
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    pj = json.loads(r.text)
+    findByVal(pj,mTitle,'id') # Find id of actor
+    r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
+    movieList = json.loads(r2.text)
+    actors = []
+    findall(movieList,"cast",actors) #access genres
+    print actors
+    return actors
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
