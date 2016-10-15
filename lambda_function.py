@@ -89,7 +89,7 @@ def get_movie(session, movieName):
     num = text.count("{")
 
     if num == 1:
-        text.format(random.choice(pullActors(movieName))
+        text.format(random.choice(pullActors(movieName)))
     elif num == 2:
         actor = random.choice(pullActors(movieName))
         movie = random.choice(pullMoviesFromActor(actor))
