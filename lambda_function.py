@@ -7,7 +7,7 @@ API_BASE="http://bartjsonapi.elasticbeanstalk.com/api"
 
 followQuestions = ["{0} is in this movie, are you a fan of theirs?",
                     "{0} also starred in {1}, have you seen that movie?"]
-
+tempVar = []
 def lambda_handler(event, context):
 
     if event["session"]["new"]:
