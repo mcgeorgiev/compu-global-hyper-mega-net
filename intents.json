@@ -1,0 +1,22 @@
+{
+    "intents": [
+        {
+            "intent": "GetMovie",
+            "slots": [
+                {
+                    "name": "movies",
+                    "type": "LIST_OF_MOVIES"
+                }
+            ]
+        },
+        {
+            "intent": "AMAZON.HelpIntent"
+        },
+        {
+            "intent": "AMAZON.StopIntent"
+        },
+        {
+            "intent": "AMAZON.CancelIntent"
+        }
+    ]
+}

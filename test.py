@@ -24,13 +24,12 @@ def on_launch(launch_request, session):
 def on_intent(intent_request, session):
     intent = intent_request["intent"]
     intent_name = intent_request["intent"]["name"]
+    print intent_request
 
-    if intent_name == "GetStatus":
-        return get_system_status()
-    elif intent_name == "GetElevators":
-        return get_elevator_status()
-    elif intent_name == "GetTrainTimes":
-        return get_train_times(intent)
+    if intent_name == "GetMovie":
+        return get_movie()
+    # elif intent_name == "GetActor":
+    #     return get_actor()
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -52,11 +51,10 @@ def handle_session_end_request():
 def get_welcome_response():
     session_attributes = {}
     card_title = "BART"
-    speech_output = "Welcome to the Alexa BART times skill. " \
-                    "You can ask me for train times from any station, or " \
-                    "ask me for system status or elevator status reports."
-    reprompt_text = "Please ask me for trains times from a station, " \
-                    "for example Fremont."
+    speech_output = "Welcome to Alexa movie database. " \
+                    "You can ask me for movies, or " \
+                    "actors."
+    reprompt_text = "Please ask me about the movie The Simpsons Movie."
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -79,6 +77,17 @@ def get_system_status():
 
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
+
+def get_movie():
+    session_attributes = {}
+    card_title = "Movie search"
+    reprompt_text = ""
+    should_end_session = False
+    speech_output = "You searched for a movie"
+
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
 
 def get_elevator_status():
     session_attributes = {}
