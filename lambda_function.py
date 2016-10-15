@@ -172,6 +172,39 @@ def no(attributes):
     return build_response(attributes, build_speechlet_response(
         card_title, text, reprompt_text, should_end_session))
 
+def findall(v, k, apList): #If I find a key, I'll return the values of the key into the SPECIFIED LIST
+    if type(v) == type({}):
+        for k1 in v:
+            if k1 == k:
+                #print v[k1]
+                apList.append(v[k1])
+            findall(v[k1], k, apList)
+    elif type(v) == type([]):
+        for i,k1 in enumerate(v): # for value in list
+            if k1 == k: #if value equals what we're looking for
+                #print v[i]
+                apList.append(v[i])
+            findall(v[i], k, apList)
+
+
+def findByVal(val,k, thingToFind): #If I find actor's name, I'll return actor's ID.
+    global tempVar
+    #Hack around, can be done recursively
+    if type(val) == type({}):
+        for k1 in val: #for each key in the dictionary
+            #print k1, "\n" #debug
+            if val[k1] == k: #if I find the name
+                for k2 in val: #Find the ID
+                    if k2 == thingToFind:
+                        print val[k2], "VALUE WE WANT"
+                        tempVar.append(val[k2])
+            findByVal(val[k1], k, thingToFind)
+    elif type(val) == type([]):
+        for i,k1 in enumerate(val): # for value in list
+            if k1 == k: #if value equals what we're looking for
+                print val[i], "TESTTSTE"
+            findByVal(val[i], k, thingToFind)
+
 def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
     aPlusName = aName.replace(" ","+")
     ps = {'q':aPlusName}
