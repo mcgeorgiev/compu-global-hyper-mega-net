@@ -17,7 +17,8 @@ def lambda_handler(event, context):
 
 def on_session_started(session_started_request, session):
     print "Starting new session."
-    session['attributes'][0] = []
+    print session
+    session['attributes']['movie'] = []
     return session
 
 def on_launch(launch_request, session):
@@ -28,7 +29,9 @@ def on_intent(intent_request, session):
     intent_name = intent_request["intent"]["name"]
     #session['attributes']['x'] = session['attributes'].get('x', 0) + 1
     # session_numbers = session['attributes'].keys()
-    session['attributes'][0].append(intent_name)
+    print '********'
+    print session['attributes']
+    session['attributes']['movie'].append(intent_request["intent"]["slots"]["movies"]["value"])
     print session
     if intent_name == "GetMovie":
         return get_movie(session['attributes'])
@@ -220,3 +223,4 @@ def build_response(session_attributes, speechlet_response):
         "sessionAttributes": session_attributes,
         "response": speechlet_response
     }
+
