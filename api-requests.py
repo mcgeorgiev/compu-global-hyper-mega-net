@@ -11,7 +11,7 @@ import json
 ##
 ##ps2 = {'q':"Nicolas Cage"}
 ##r2 = requests.get('http://imdb.wemakesites.net/api/search',params = ps2)
-##
+##          
 ###print r2.url
 ###print r2.text
 
@@ -19,9 +19,6 @@ import json
 #Generalize final functions
 #Finalize genre getting
 #Get a list of every movie
-
-tempVar = [] # Hack around for findByVal
-
 
 def findall(v, k, apList): #If I find a key, I'll return the values of the key into the SPECIFIED LIST
     if type(v) == type({}):
@@ -36,6 +33,22 @@ def findall(v, k, apList): #If I find a key, I'll return the values of the key i
                 #print v[i]
                 apList.append(v[i])
             findall(v[i], k, apList)
+
+def findSome(v, k, apList, instances):
+    if len(apList) >= instances+1:
+        return None
+    elif type(v) == type({}):
+        for k1 in v:
+            if k1 == k:
+                #print v[k1]
+                apList.append(v[k1])
+            findSome(v[k1], k, apList, instances)
+    elif type(v) == type([]):
+        for i,k1 in enumerate(v): # for value in list
+            if k1 == k: #if value equals what we're looking for
+                #print v[i]
+                apList.append(v[i])
+            findSome(v[i], k, apList, instances)
 
 def findMore(v, k, nestList): #Generalized findall
     if type(v) == type({}):
@@ -54,8 +67,7 @@ def findMore(v, k, nestList): #Generalized findall
 
 
 def findByVal(val,k, thingToFind): #If I find actor's name, I'll return actor's ID.
-    # global tempVar
-    print tempVar
+    global tempVar
     #Hack around, can be done recursively
     if type(val) == type({}):
         for k1 in val: #for each key in the dictionary
@@ -67,11 +79,48 @@ def findByVal(val,k, thingToFind): #If I find actor's name, I'll return actor's 
                         tempVar.append(val[k2])
             findByVal(val[k1], k, thingToFind)
     elif type(val) == type([]):
-        for i,k1 in enumerate(val): # for value in list
+        for i,k1 in enumerate(val): # for value in list 
             if k1 == k: #if value equals what we're looking for
                 print val[i], "TESTTSTE"
             findByVal(val[i], k, thingToFind)
 
+def findByVal2(val,k, thingToFind, testList): #If I find actor's name, I'll return actor's ID.
+    #Hack around, can be done recursively
+    if type(val) == type({}):
+        for k1 in val: #for each key in the dictionary
+            if val[k1] == k:
+                for k2 in val:
+                    if k2 == thingToFind:
+                        print val[k2]
+                        testList.append(val[k2])
+                    findByVal2(val[k1],k, thingToFind, testList)
+    elif type(val) == type([]):
+        for i in val:
+            findByVal2(i,k,thingToFind,testList)
+
+def pullGenres(mTitle):
+    ps = {'q':mTitle}
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    pj = json.loads(r.text)
+    tempList = []
+    #print pj
+    findByVal2(pj,mTitle,'id',tempList) # Find id of s
+    if len(tempList)>0:
+        r2 = requests.get('http://imdb.wemakesites.net/api/' + tempList[0])
+        movieList = json.loads(r2.text)
+        genres = []
+        findall(movieList,"genres",genres) #access genres
+        print genres
+        return genres
+    else:
+        print -1
+        return 1
+
+
+
+
+
+            
 def pullThings(mTitle,things,wantRating): #HAS TO BE SPECIFIC THINGS FROM THE API, BUT IT'S WORKING YAY
     #Returns a list of lists, where the categories are in order they were put in
     thingList = [[] for i in range(len(things))]
@@ -87,24 +136,13 @@ def pullThings(mTitle,things,wantRating): #HAS TO BE SPECIFIC THINGS FROM THE AP
     pj = json.loads(r.text)
     findByVal(pj,mTitle,'id') # Find id of actor
     r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
-    movieList = json.loads(r2.text)
+    movieList = json.loads(r2.text) 
     findMore(movieList,things,thingList) #access genres
     print thingList
-
-
+    
+               
 #can be generalized - need to generalize findall, findByValue first!
-
-def pullGenres(mTitle):
-    ps = {'q':mTitle}
-    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
-    pj = json.loads(r.text)
-    findByVal(pj,mTitle,'id') # Find id of actor
-    r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
-    movieList = json.loads(r2.text)
-    genres = []
-    findall(movieList,"genres",genres) #access genres
-    print genres
-    return genres
+    
 
 def pullActors(mTitle):
     ps = {'q':mTitle}
@@ -116,9 +154,9 @@ def pullActors(mTitle):
     actors = []
     findall(movieList,"cast",actors) #access genres
     print actors
-    return actors
-
-def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
+    return actors[:3]
+    
+def pullMoviesFromActor(aName): ##Goes through 3 recursive functions 
     aPlusName = aName.replace(" ","+")
     ps = {'q':aPlusName}
     r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
@@ -130,14 +168,13 @@ def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
     r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
     actorPage = json.loads(r2.text)
     movies = []
-    findall(actorPage,"title",movies) #Find all movies the actor is in
+    findSome(actorPage,"title",movies,5) #Find all movies the actor is in
     print movies[1:] #movie 0 is actor name lol
     return movies[1:]
 
+tempVar = [] # Hack around for findByVal
 
-pullActors("Blair Witch")
-#pullMoviesFromActor("Nicolas Cage")
-#pullAandG("Inception")
+pullMoviesFromActor("Nicolas Cage")
 #pullGenres("Tangled")
 
 #pullThings("Inception",["cast","released"],1)
