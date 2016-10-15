@@ -43,8 +43,8 @@ def on_intent(intent_request, session):
         return no(session['attributes'])
     elif intent_name == "Yes":
         return yes(session['attributes'])
-    # elif intent_name == "GetActor":
-    #     return get_actor()
+    elif intent_name == "GetActor":
+        return get_actor()
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
@@ -57,15 +57,15 @@ def on_session_ended(session_ended_request, session):
     # Cleanup goes here...
 
 def handle_session_end_request():
-    card_title = "BART - Thanks"
-    speech_output = "Thank you for using the BART skill.  See you next time!"
+    card_title = "Movies - Thanks"
+    speech_output = "Thank you for using the Movies skill.  See you next time!"
     should_end_session = True
 
     return build_response({}, build_speechlet_response(card_title, speech_output, None, should_end_session))
 
 def get_welcome_response():
     session_attributes = {}
-    card_title = "BART"
+    card_title = "Welcome Response"
     speech_output = "Welcome to Alexa movie database. " \
                     "You can ask me for movies, or " \
                     "actors."
@@ -74,24 +74,6 @@ def get_welcome_response():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-def get_system_status():
-    session_attributes = {}
-    card_title = "BART System Status"
-    reprompt_text = ""
-    should_end_session = False
-
-    response = urllib2.urlopen(API_BASE + "/status")
-    bart_system_status = json.load(response)
-
-    speech_output = "There are currently " + bart_system_status["traincount"] + " trains operating. "
-
-    if len(bart_system_status["message"]) > 0:
-        speech_output += bart_system_status["message"]
-    else:
-        speech_output += "The trains are running normally."
-
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
 
 def get_movie(session, movieName):
     session_attributes = session
@@ -114,6 +96,31 @@ def get_movie(session, movieName):
     session['movie'].append(dicti)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
+
+
+def get_actor(session, actorName):
+    session_attributes = session
+    card_title = "Actor search"
+    reprompt_text = ""
+    should_end_session = False
+    speech_output = "You searched for %s" %(actorName)
+
+    text = random.choice(followQuestions)
+    place = followQuestions.index(text)
+    if place == 0:
+        text.format("actor name")
+    elif place == 1:
+        text.format("actor name", "movie 2")
+
+    speech_output+= ', '
+    speech_output += text
+    session['movie'].append(actorName)
+    dicti = {"question":text, "actor" : "actor name", "film" : "movie 2"}
+    session['movie'].append(dicti)
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
+
 
 def yes(attributes):
     card_title = "they answered yes"
@@ -153,109 +160,6 @@ def no(attributes):
     return build_response(attributes, build_speechlet_response(
         card_title, text, reprompt_text, should_end_session))
 
-
-
-
-def get_elevator_status():
-    session_attributes = {}
-    card_title = "BART Elevator Status"
-    reprompt_text = ""
-    should_end_session = False
-
-    response = urllib2.urlopen(API_BASE + "/elevatorstatus")
-    bart_elevator_status = json.load(response)
-
-    speech_output = "BART elevator status. " + bart_elevator_status["bsa"]["description"]
-
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-def get_train_times(intent):
-    session_attributes = {}
-    card_title = "BART Departures"
-    speech_output = "I'm not sure which station you wanted train times for. " \
-                    "Please try again."
-    reprompt_text = "I'm not sure which station you wanted train times for. " \
-                    "Try asking about Fremont or Powell Street for example."
-    should_end_session = False
-
-    if "Station" in intent["slots"]:
-        station_name = intent["slots"]["Station"]["value"]
-        station_code = get_station_code(station_name.lower())
-
-        if (station_code != "unkn"):
-            card_title = "BART Departures from " + station_name.title()
-
-            response = urllib2.urlopen(API_BASE + "/departures/" + station_code)
-            station_departures = json.load(response)
-
-            speech_output = "Train departures from " + station_name + " are as follows: "
-            for destination in station_departures["etd"]:
-                speech_output += "Towards " + destination["destination"] + " on platform " + destination["estimate"][0]["platform"] + ". ";
-                for estimate in destination["estimate"]:
-                    if estimate["minutes"] == "Leaving":
-                        speech_output += "Leaving now: "
-                    elif estimate["minutes"] == "1":
-                        speech_output += "In one minute: "
-                    else:
-                        speech_output += "In " + estimate["minutes"] + " minutes: "
-
-                    speech_output += estimate["length"] + " car train. "
-
-            reprompt_text = ""
-
-    return build_response(session_attributes, build_speechlet_response(
-        card_title, speech_output, reprompt_text, should_end_session))
-
-def get_station_code(station_name):
-    return {
-        "12th street oakland city center": "12th",
-        "16th street mission": "16th",
-        "19th street oakland": "19th",
-        "24th street mission": "24th",
-        "ashby": "ashb",
-        "balboa park": "balb",
-        "bay fair": "bayf",
-        "castro valley": "cast",
-        "civic center": "civc",
-        "coliseum": "cols",
-        "colma": "colm",
-        "concord": "conc",
-        "daly city": "daly",
-        "downtown berkeley": "dbrk",
-        "dublin pleasanton": "dubl",
-        "el cerrito del norte": "deln",
-        "del norte": "deln",
-        "el cerrito plaza": "plza",
-        "embarcadero": "embr",
-        "fremont": "frmt",
-        "fruitvale": "ftvl",
-        "glen park": "glen",
-        "hayward": "hayw",
-        "lafayette": "lafy",
-        "lake merritt": "lake",
-        "macarthur": "mcar",
-        "millbrae": "mlbr",
-        "montgomery street": "mont",
-        "north berkeley": "nbrk",
-        "north concord martinez": "ncon",
-        "oakland airport": "oakl",
-        "orinda": "orin",
-        "pittsburg bay point": "pitt",
-        "pleasant hill": "phil",
-        "powell street": "powl",
-        "richmond": "rich",
-        "rockridge": "rock",
-        "san bruno": "sbrn",
-        "san francisco airport": "sfia",
-        "san leandro": "sanl",
-        "south hayward": "shay",
-        "south san francisco": "ssan",
-        "union city": "ucty",
-        "walnut creek": "wcrk",
-        "west dublin pleasanton": "wdub",
-        "west oakland": "woak",
-    }.get(station_name, "unkn")
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
