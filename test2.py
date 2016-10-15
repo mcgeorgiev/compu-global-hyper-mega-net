@@ -6,7 +6,7 @@ API_BASE="http://bartjsonapi.elasticbeanstalk.com/api"
 def lambda_handler(event, context):
 
     if event["session"]["new"]:
-        on_session_started({"requestId": event["request"]["requestId"]}, event["session"])
+        event['session'] = on_session_started({"requestId": event["request"]["requestId"]}, event["session"])
 
     if event["request"]["type"] == "LaunchRequest":
         return on_launch(event["request"], event["session"])
@@ -18,6 +18,7 @@ def lambda_handler(event, context):
 def on_session_started(session_started_request, session):
     print "Starting new session."
     session['attributes'][0] = []
+    return session
 
 def on_launch(launch_request, session):
     return get_welcome_response()
