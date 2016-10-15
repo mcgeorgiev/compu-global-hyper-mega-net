@@ -26,7 +26,7 @@ def on_session_started(session_started_request, session):
     return session
 
 def on_launch(launch_request, session):
-    return get_welcome_response()=
+    return get_welcome_response()
 
 def on_intent(intent_request, session):
     intent = intent_request["intent"]
@@ -93,8 +93,8 @@ def get_system_status():
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
-def get_movie(movie, movieName):
-    session_attributes = movie
+def get_movie(session, movieName):
+    session_attributes = session
     card_title = "Movie search"
     reprompt_text = ""
     should_end_session = False
@@ -109,8 +109,9 @@ def get_movie(movie, movieName):
 
     speech_output+= ', '
     speech_output += text
-    session['attributes']['movie'].append(movieName)
-    session['attributes']['movie'].append({"question"=text, "actor" = "actor name", "film" = "movie 2"})
+    session['movie'].append(movieName)
+    dicti = {"question":text, "actor" : "actor name", "film" : "movie 2"}
+    session['movie'].append(dicti)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
@@ -128,7 +129,7 @@ def yes(attributes):
         text.format("actor name", "movie 2")
 
 
-    attributes['attributes']['movie'].append({"question"=text, "actor" = "actor name", "film" = "movie 2"})
+    attributes['movie'].append({"question":text, "actor" : "actor name", "film" : "movie 2"})
 
     return build_response(attributes, build_speechlet_response(
         card_title, text, reprompt_text, should_end_session))
@@ -147,7 +148,7 @@ def no(attributes):
         text.format("actor name", "movie 2")
 
 
-    attributes['attributes']['movie'].append({"question"=text, "actor" = "actor name", "film" = "movie 2"})
+    attributes['movie'].append({"question":text, "actor" : "actor name", "film" : "movie 2"})
 
     return build_response(attributes, build_speechlet_response(
         card_title, text, reprompt_text, should_end_session))
