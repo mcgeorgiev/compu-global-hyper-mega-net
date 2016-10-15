@@ -22,7 +22,7 @@ def on_session_started(session_started_request, session):
     return session
 
 def on_launch(launch_request, session):
-    return get_welcome_response()
+    return get_welcome_response()=
 
 def on_intent(intent_request, session):
     intent = intent_request["intent"]
@@ -223,4 +223,3 @@ def build_response(session_attributes, speechlet_response):
         "sessionAttributes": session_attributes,
         "response": speechlet_response
     }
-
