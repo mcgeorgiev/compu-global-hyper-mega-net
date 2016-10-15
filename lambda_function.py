@@ -5,9 +5,10 @@ import requests
 
 API_BASE="http://bartjsonapi.elasticbeanstalk.com/api"
 
-followQuestions = ["{0} is in this movie, are you a fan of theirs?",
-                    "{0} also starred in {1}, have you seen that movie?"]
+followQuestions = [" is in this movie, are you a fan of theirs?",
+                    [" also starred in "," have you seen that movie?"]]
 tempVar = []
+
 def lambda_handler(event, context):
 
     if event["session"]["new"]:
@@ -83,17 +84,18 @@ def get_movie(session, movieName):
     should_end_session = False
     speech_output = "You searched for %s" %(movieName)
 
-    text = followQuestions[1]# random.choice(followQuestions)
+    text = followQuestions[1]
+    # random.choice(followQuestions)
     #place = followQuestions.index(text)
 
-    num = text.count("{")
+    #num = text.count("{")
 
-    if num == 1:
-        text.format(random.choice(pullActors(movieName)))
-    elif num == 2:
-        actor = random.choice(pullActors(movieName))
-        movie = random.choice(pullMoviesFromActor(actor))
-        text.format(actor, movie)
+    # if num == 1:
+    #     text.format(random.choice(pullActors(movieName)))
+    # elif num == 2:
+    actor = random.choice(makeActorList(movieName))
+    movie = random.choice(pullMoviesFromActor(actor))
+    textfinal = actor + text[0] + movie + text[1]
 
     speech_output+= ', '
     speech_output += text
@@ -186,9 +188,24 @@ def findall(v, k, apList): #If I find a key, I'll return the values of the key i
                 apList.append(v[i])
             findall(v[i], k, apList)
 
+def makeActorList(mTitle):
+    ps = {'t': mTitle, 'r': "json", 'tomatoes' : True}
+    r = requests.get('http://www.omdbapi.com/?',params = ps,timeout=10)
+    result = json.loads(r.text)
+
+    actList = []
+    actors = str((result ["Actors"]))
+    actList = actors.split (",")
+    i = 0
+    for actor in actList:
+        if actor [0] == " ":
+            actList [i]  = actor [1:]
+        i += 1
+    return actList
 
 def findByVal(val,k, thingToFind): #If I find actor's name, I'll return actor's ID.
-    global tempVar
+    #global tempVar
+    print tempVar
     #Hack around, can be done recursively
     if type(val) == type({}):
         for k1 in val: #for each key in the dictionary
@@ -208,13 +225,13 @@ def findByVal(val,k, thingToFind): #If I find actor's name, I'll return actor's 
 def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
     aPlusName = aName.replace(" ","+")
     ps = {'q':aPlusName}
-    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps,timeout=10)
     pj = json.loads(r.text)
     #print r.url
     names = []
     findall(pj,"names",names) #find all name dicts (only 1)
     findByVal(names,aName,'id') # Find id of actor
-    r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
+    r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0],timeout=10)
     actorPage = json.loads(r2.text)
     movies = []
     findall(actorPage,"title",movies) #Find all movies the actor is in
@@ -223,7 +240,7 @@ def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
 
 def pullActors(mTitle):
     ps = {'q':mTitle}
-    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps,timeout=10)
     pj = json.loads(r.text)
     findByVal(pj,mTitle,'id') # Find id of actor
     r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
