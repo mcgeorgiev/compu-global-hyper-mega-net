@@ -2,6 +2,9 @@ import urllib2
 import json
 import random
 import requests
+from datetime import datetime
+random.seed(datetime.now())
+
 
 API_BASE="http://bartjsonapi.elasticbeanstalk.com/api"
 
@@ -85,25 +88,27 @@ def get_movie(session, movieName):
     speech_output = "You searched for %s" %(movieName)
 
     text = followQuestions[1]
-    # random.choice(followQuestions)
-    #place = followQuestions.index(text)
 
-    #num = text.count("{")
 
-    # if num == 1:
-    #     text.format(random.choice(pullActors(movieName)))
-    # elif num == 2:
-    print "before actor"
-    actor = random.choice(makeActorList(movieName))
-    print "after actor"
-    movie = random.choice(pullMoviesFromActor(actor))
-    print "after movie"
+    # filmId = findFilmId(movieName)
+    # print filmId
+    # temp = findFilmGenreAndCast(filmId)
+    # actor = random.choice([1])
+    actor = random.choice(findFilmGenreAndCast(findFilmId(movieName)))
+    print actor
+   #actor = random.choice(temp[1])
+    movie = random.choice(findActorFilms(findActorId(actor)))
+
+    print actor
+
+
+    movie = random.choice(findActorFilms(findActorId(actor)))
     textfinal = actor + text[0] + movie + text[1]
 
     speech_output+= ', '
-    speech_output += text
+    speech_output += textfinal
     session['movie'].append(movieName)
-    dicti = {"question":text, "actor" : actor, "film" : movie}
+    dicti = {"question":speech_output, "actor" : actor, "film" : movie}
     session['movie'].append(dicti)
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -142,40 +147,100 @@ def yes(attributes):
     text = followQuestions[1]#random.choice(followQuestions)
     #num = followQuestions.count('{')
 
-    data = attributes['movies'][-1]
+    data = attributes['movie'][-1]
 
-    # if num == 0:
-    #     data
-    #     text.format("actor name")
-    # elif num == 1:
-    #     text.format("actor name", "movie 2")
-    actor = pullActors(data['movie'])
-    film = pullMoviesFromActor(actor)
-    text.format(actor, film)
+    print data['film']
+    actor = random.choice(findFilmGenreAndCast(findFilmId(data['film'])))
+    print actor
+    movie = random.choice(findActorFilms(findActorId(actor)))
 
-    attributes['movie'].append({"question":text, "actor" : actor, "film" : film})
+
+    attributes['movie'].append({"question":text, "actor" : actor, "film" : movie})
+
+    rating = getRatingOfFilm(movie)
+    if rating <10:
+        info = "I think the film is pretty shite"
+    elif rating >10 and rating < 20:
+        info = "I think the film is quite bad"
+    elif rating >20 and rating < 30:
+        info = "I think the film is probably so bad its good"
+    elif rating >30 and rating < 60:
+        info = "I think the film is bad to reasonable"
+    elif rating > 60 and rating < 70:
+        info = "I think the film is actually alright"
+    elif rating > 70 and rating < 80:
+        info = "I think the film is very good"
+    elif rating > 80 and rating < 100:
+        info = "I think the film is really very good"
+    else:
+        info = 'Im not sure about the film'
+
+    textfinal = actor + text[0] + movie +', ' +info +', '+ text[1]
+    speech_output = ''
+    speech_output += textfinal
+    attributes['movie'].append(movie)
+    dicti = {"question":speech_output, "actor" : actor, "film" : movie}
+    attributes['movie'].append(dicti)
 
     return build_response(attributes, build_speechlet_response(
-        card_title, text, reprompt_text, should_end_session))
+        card_title, speech_output, reprompt_text, should_end_session))
 
 
 def no(attributes):
     card_title = "they answered no"
     reprompt_text = ''
     should_end_session = False
-    text = random.choice(followQuestions)
-    place = followQuestions.index(text)
+    text = followQuestions[1]#random.choice(followQuestions)
+    #num = followQuestions.count('{')
 
-    if place == 0:
-        text.format("actor name")
-    elif place == 1:
-        text.format("actor name", "movie 2")
+    data = attributes['movie'][-1]
 
+    actor = random.choice(findFilmGenreAndCast(findFilmId(data['film'])))
+    movie = random.choice(findActorFilms(findActorId(actor)))
+    #text.format(actor, film)
 
-    attributes['movie'].append({"question":text, "actor" : "actor name", "film" : "movie 2"})
+    attributes['movie'].append({"question":text, "actor" : actor, "film" : movie})
 
+    #attributes['movie'].append(movie)
+
+    rating = getRatingOfFilm(movie)
+    if rating <10:
+        info = "I think the film is pretty shite"
+    elif rating >10 and rating < 20:
+        info = "I think the film is quite bad"
+    elif rating >20 and rating < 30:
+        info = "I think the film is probably so bad its good"
+    elif rating >30 and rating < 60:
+        info = "I think the film is bad to reasonable"
+    elif rating > 60 and rating < 70:
+        info = "I think the film is actually alright"
+    elif rating > 70 and rating < 80:
+        info = "I think the film is very good"
+    elif rating > 80 and rating < 100:
+        info = "I think the film is really very good"
+    else:
+        info = 'Im not sure about the film'
+
+    textfinal = actor + text[0] + movie +', ' +info +', '+ text[1]
+    speech_output = ''
+    speech_output += textfinal
+    dicti = {"question":speech_output, "actor" : actor, "film" : movie}
+    attributes['movie'].append(dicti)
     return build_response(attributes, build_speechlet_response(
-        card_title, text, reprompt_text, should_end_session))
+        card_title, speech_output, reprompt_text, should_end_session))
+    # text = random.choice(followQuestions)
+    # place = followQuestions.index(text)
+
+    # if place == 0:
+    #     text.format("actor name")
+    # elif place == 1:
+    #     text.format("actor name", "movie 2")
+
+
+    # attributes['movie'].append({"question":text, "actor" : "actor name", "film" : "movie 2"})
+
+    # return build_response(attributes, build_speechlet_response(
+    #     card_title, text, reprompt_text, should_end_session))
 
 
 def makeActorList(mTitle):
@@ -346,6 +411,64 @@ def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
     return movies[1:]
 
 tempVar = [] # Hack around for findByVal
+
+def getRatingOfFilm (mTitle):
+    try:
+        ps = {'t': mTitle, 'r': "json", 'tomatoes' : True}
+        r = requests.get('http://www.omdbapi.com/?',params = ps)
+        result = json.loads(r.text)
+        rating = result ["tomatoMeter"]
+        return int (rating)
+    except:
+        return "unknown"
+
+
+# get the Id of an actor based on their full name
+def findActorId (actorName):
+    ps = {'q': actorName}
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    result = json.loads(r.text)
+    people = result ["data"] ["results"] ["names"]
+
+    for person in people:
+        if person ["title"].lower() == actorName.lower():
+            print str(person ["id"])
+            return str(person ["id"]) # type str
+    return 'nm0000102'
+
+
+# get the actor's film
+def findActorFilms (actorId):
+    r = requests.get('http://imdb.wemakesites.net/api/' + actorId)
+    result = json.loads (r.text)
+    films = result ["data"] ["filmography"]
+    theirFilms = []
+
+    for film in films:
+        theirFilms += [film ["title"]]
+
+    return theirFilms # type list
+
+# get the Id of a film based on its title
+def findFilmId (filmTitle):
+    ps = {'q': filmTitle}
+    r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
+    result = json.loads (r.text)
+
+    films = result ["data"] ["results"] ["titles"]
+    for film in films:
+        if (film ["title"]).lower() == filmTitle.lower():
+            return str(film["id"]) # type str
+    return 'tt0087277'
+
+# get the genre and cast of a film based on its Id
+def findFilmGenreAndCast (filmId):
+    r = requests.get('http://imdb.wemakesites.net/api/' + filmId)
+    result = json.loads (r.text)
+    genres = result ["data"] ["genres"]
+    cast = result ["data"] ["cast"]
+    # tuple of ( list of genres, list of cast)
+    return cast
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {

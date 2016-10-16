@@ -1,6 +1,6 @@
 import requests
 import json
-
+import time
 
 #### OMDB API
 ##ps = {'t': "Groundhog Day", 'r': "json", 'plot': "short"} #Parameters
@@ -11,7 +11,7 @@ import json
 ##
 ##ps2 = {'q':"Nicolas Cage"}
 ##r2 = requests.get('http://imdb.wemakesites.net/api/search',params = ps2)
-##          
+##
 ###print r2.url
 ###print r2.text
 
@@ -79,7 +79,7 @@ def findByVal(val,k, thingToFind): #If I find actor's name, I'll return actor's 
                         tempVar.append(val[k2])
             findByVal(val[k1], k, thingToFind)
     elif type(val) == type([]):
-        for i,k1 in enumerate(val): # for value in list 
+        for i,k1 in enumerate(val): # for value in list
             if k1 == k: #if value equals what we're looking for
                 print val[i], "TESTTSTE"
             findByVal(val[i], k, thingToFind)
@@ -120,7 +120,7 @@ def pullGenres(mTitle):
 
 
 
-            
+
 def pullThings(mTitle,things,wantRating): #HAS TO BE SPECIFIC THINGS FROM THE API, BUT IT'S WORKING YAY
     #Returns a list of lists, where the categories are in order they were put in
     thingList = [[] for i in range(len(things))]
@@ -136,13 +136,13 @@ def pullThings(mTitle,things,wantRating): #HAS TO BE SPECIFIC THINGS FROM THE AP
     pj = json.loads(r.text)
     findByVal(pj,mTitle,'id') # Find id of actor
     r2 = requests.get('http://imdb.wemakesites.net/api/' + tempVar[0])
-    movieList = json.loads(r2.text) 
+    movieList = json.loads(r2.text)
     findMore(movieList,things,thingList) #access genres
     print thingList
-    
-               
+
+
 #can be generalized - need to generalize findall, findByValue first!
-    
+
 
 def pullActors(mTitle):
     ps = {'q':mTitle}
@@ -155,8 +155,8 @@ def pullActors(mTitle):
     findall(movieList,"cast",actors) #access genres
     print actors
     return actors[:3]
-    
-def pullMoviesFromActor(aName): ##Goes through 3 recursive functions 
+
+def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
     aPlusName = aName.replace(" ","+")
     ps = {'q':aPlusName}
     r = requests.get('http://imdb.wemakesites.net/api/search',params = ps)
@@ -173,8 +173,10 @@ def pullMoviesFromActor(aName): ##Goes through 3 recursive functions
     return movies[1:]
 
 tempVar = [] # Hack around for findByVal
-
+start_time = time.time()
 pullMoviesFromActor("Nicolas Cage")
+print("--- %s seconds ---" % (time.time() - start_time))
+
 #pullGenres("Tangled")
 
 #pullThings("Inception",["cast","released"],1)

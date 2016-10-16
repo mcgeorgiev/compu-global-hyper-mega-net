@@ -9,6 +9,21 @@
                 }
             ]
         },
+      	{
+            "intent": "GetActor",
+            "slots": [
+                {
+                    "name": "actors",
+                    "type": "LIST_OF_ACTORS"
+                }
+            ]
+        },
+      	{
+          "intent":"No"
+        },
+      	{
+          "intent":"Yes"
+      	},
         {
             "intent": "AMAZON.HelpIntent"
         },
